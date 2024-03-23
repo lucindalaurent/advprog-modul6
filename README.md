@@ -122,3 +122,6 @@ fn handle_connection(mut stream: TcpStream) {
     stream.write_all(response.as_bytes()).unwrap();
 }
 ```
+#### Commit 4 Reflection notes: why the response become slow?
+Jika sebelumnya hanya terdapat 2 kasus (http://127.0.0.1:7878/ dan lainnya), sekarang kita menambahkan kasus ketiga yaitu `http://127.0.0.1:7878/sleep`.
+Apabila kita melakukan request `/sleep` tersebut, server akan menunggu 10 detik sebelum merender halaman `hello.html`. Masalah timbul jika kita membuka `http://127.0.0.1:7878/sleep` terlebih dulu kemudian membuka `http://127.0.0.1:7878/` tidak lama setelahnya. Kita harus menunggu sampai request `/sleep` tersebut selesai dulu baru request `/` akan dijalankan. Padahal request `/` seharusnya bisa dijalankan dengan cepat. Hal ini terjadi karena web server kita masih single-threaded. Artinya server akan memproses request-request yang ada satu per satu sesuai urutan request itu masuk. Seperti yang terjadi tadi, apabila ada request yang perlu diproses dalam waktu lama, request yang masuk setelahnya harus menunggu sampai request yang lama tersebut selesai sekalipun request baru tersebut sebenarnya bisa diproses dengan cepat. Karena itulah, web server kita saat ini masih belum optimal. 
